@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Cadastrar Cônjuge</h1>
+<form method="POST" action="/conjuges/cadastro">
+  <label>Usuário A:</label>
+  <select name="usuario_a">
+    <% usuarios.forEach(u => { %>
+      <option value="<%= u.id_usuario %>"><%= u.no_usuario %></option>
+    <% }) %>
+  </select>
+  <label>Usuário B:</label>
+  <select name="usuario_b">
+    <% usuarios.forEach(u => { %>
+      <option value="<%= u.id_usuario %>"><%= u.no_usuario %></option>
+    <% }) %>
+  </select>
+  <label>Data do Casamento:</label>
+  <input type="date" name="dt_casamento">
+  <label>Local:</label>
+  <input type="text" name="ds_local">
+  <button type="submit">Salvar</button>
+</form>
+</body>
+</html>

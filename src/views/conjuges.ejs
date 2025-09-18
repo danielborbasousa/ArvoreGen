@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Lista de Cônjuges</h1>
+<a href="/conjuges/cadastro">Novo Cônjuge</a>
+<ul>
+  <% conjuges.forEach(c => { %>
+    <li>
+      <%= c.usuario_a %> & <%= c.usuario_b %> - Casados em <%= c.dt_casamento %> (<%= c.ds_local %>)
+      <a href="/conjuges/edit/<%= c.id_conjuge %>">Editar</a>
+      <a href="/conjuges/delete/<%= c.id_conjuge %>">Excluir</a>
+    </li>
+  <% }) %>
+</ul>
+</body>
+</html>

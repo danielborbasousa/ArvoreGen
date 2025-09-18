@@ -1,0 +1,11 @@
+<h1>Lista de Filhos</h1>
+<a href="/filhos/cadastro">Novo Filho</a>
+<ul>
+  <% filhos.forEach(f => { %>
+    <li>
+      Filho: <%= f.filho %> | Pai: <%= f.pai %> | Mãe: <%= f.mae %>
+      <a href="/filhos/edit/<%= f.id_filho %>">Editar</a>
+      <a href="/filhos/delete/<%= f.id_filho %>">Excluir</a>
+    </li>
+  <% }) %>
+</ul>

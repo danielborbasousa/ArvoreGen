@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Cadastrar Filho</h1>
+<form method="POST" action="/filhos/cadastro">
+  <label>Filho (usuário):</label>
+  <select name="id_usuario_filho">
+    <% usuarios.forEach(u => { %>
+      <option value="<%= u.id_usuario %>"><%= u.no_usuario %></option>
+    <% }) %>
+  </select>
+  <label>Pai:</label>
+  <select name="id_pai">
+    <% usuarios.forEach(u => { %>
+      <option value="<%= u.id_usuario %>"><%= u.no_usuario %></option>
+    <% }) %>
+  </select>
+  <label>Mãe:</label>
+  <select name="id_mae">
+    <% usuarios.forEach(u => { %>
+      <option value="<%= u.id_usuario %>"><%= u.no_usuario %></option>
+    <% }) %>
+  </select>
+  <button type="submit">Salvar</button>
+</form>
+</body>
+</html>
