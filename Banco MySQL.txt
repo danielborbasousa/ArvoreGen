@@ -1,0 +1,55 @@
+CREATE DATABASE sistema_familia;
+USE sistema_familia;
+
+-- Tabela de usuários
+CREATE TABLE tbl_usuarios (
+    id_usuario BIGINT AUTO_INCREMENT PRIMARY KEY,
+    no_usuario VARCHAR(120) NOT NULL,
+    pw_senha VARCHAR(80) NOT NULL,
+    dt_nascimento DATE,
+    ds_email VARCHAR(120),
+    nu_vertical INT,
+    nu_horizontal INT,
+    nu_whatsapp VARCHAR(20),
+    lk_foto VARCHAR(80)
+);
+
+-- Tabela de cônjuges
+CREATE TABLE tbl_conjuges (
+    id_conjuge BIGINT AUTO_INCREMENT PRIMARY KEY,
+    usuario_a BIGINT,
+    usuario_b BIGINT,
+    dt_casamento DATE,
+    ds_local VARCHAR(80),
+    FOREIGN KEY (usuario_a) REFERENCES tbl_usuarios(id_usuario),
+    FOREIGN KEY (usuario_b) REFERENCES tbl_usuarios(id_usuario)
+);
+
+-- Tabela de filhos
+CREATE TABLE tbl_filhos (
+    id_filho BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_usuario_filho BIGINT,
+    id_pai BIGINT,
+    id_mae BIGINT,
+    FOREIGN KEY (id_usuario_filho) REFERENCES tbl_usuarios(id_usuario),
+    FOREIGN KEY (id_pai) REFERENCES tbl_usuarios(id_usuario),
+    FOREIGN KEY (id_mae) REFERENCES tbl_usuarios(id_usuario)
+);
+
+
+USE sistema_familia;
+
+INSERT INTO tbl_usuarios (no_usuario, pw_senha, dt_nascimento, ds_email, nu_vertical, nu_horizontal, nu_whatsapp, lk_foto)
+VALUES
+('João Silva', '1234', '1990-05-15', 'joao@email.com', 1, 1, '11999999999', 'joao.png'),
+('Maria Souza', '1234', '1992-08-20', 'maria@email.com', 2, 1, '11988888888', 'maria.png'),
+('Pedro Oliveira', '1234', '2015-03-10', 'pedro@email.com', 1, 2, NULL, 'pedro.png');
+
+
+INSERT INTO tbl_conjuges (usuario_a, usuario_b, dt_casamento, ds_local)
+VALUES (1, 2, '2014-06-20', 'São Paulo');
+
+INSERT INTO tbl_filhos (id_usuario_filho, id_pai, id_mae)
+VALUES (3, 1, 2);
+
+SELECT * FROM tbl_usuarios
