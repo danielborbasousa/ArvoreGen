@@ -1,30 +1,29 @@
 const express = require("express");
-const path = require("path");
-const bodyParser = require("body-parser");
+const cors = require("cors");
+const db = require("./config/db");
 
-const usuarioRoutes = require("./routes/usuarios");
-const conjugeRoutes = require("./routes/conjuges");
-const filhoRoutes = require("./routes/filhos");
+// importa as rotas
+const usuariosRoutes = require("./routes/usuarios");
+const conjuguesRoutes = require("./routes/conjugues");
+const filhosRoutes = require("./routes/filhos");
 
 const app = express();
+app.use(cors());
+app.use(express.json());
 
-// Middleware
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "../public")));
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+// rotas
+app.use("/usuarios", usuariosRoutes);
+app.use("/conjugues", conjuguesRoutes);  // <- nome igual ao da pasta
+app.use("/filhos", filhosRoutes);
 
-// Rotas
-app.use("/usuarios", usuarioRoutes);
-app.use("/conjuges", conjugeRoutes);
-app.use("/filhos", filhoRoutes);
-
-// Rota inicial -> Dashboard
-app.get("/", (req, res) => {
-  res.render("dashboard");
-});
-
-const PORT = 3000;
+const PORT = 3001;
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`Servidor rodando na porta ${PORT}`);
+  db.connect(err => {
+    if (err) {
+      console.error("Erro ao conectar no MySQL:", err);
+      return;
+    }
+    console.log("Conectado ao MySQL!");
+  });
 });
