@@ -1,0 +1,12 @@
+Para rodar o front:
+npm run dev
+
+
+Para rodar o back:
+node src/app.js
+
+
+instalações no terminal
+
+
+npm install tailwindcss postcss autoprefixer
