@@ -2,16 +2,16 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 
-// ✅ ROTA DE CADASTRO (Corrigida: Sem o campo 'role')
+// ✅ ROTA DE CADASTRO
 router.post("/", (req, res) => {
   const { no_usuario, pw_senha, ds_email, nu_whatsapp, dt_nascimento, lk_foto } = req.body;
 
-  // Validação básica
   if (!no_usuario || !pw_senha || !ds_email) {
     return res.status(400).json({ error: "Campos obrigatórios ausentes (Nome, Senha, Email)." });
   }
 
-  // Removi 'role' desta query para compatibilidade com seu banco
+  // NOTA: Não precisamos enviar o 'role' aqui. 
+  // Como você configurou "DEFAULT 'user'" no banco, o MySQL vai preencher sozinho.
   const sql = `
     INSERT INTO tbl_usuarios 
     (no_usuario, pw_senha, ds_email, nu_whatsapp, dt_nascimento, lk_foto, nu_vertical, nu_horizontal)
@@ -37,7 +37,7 @@ router.post("/", (req, res) => {
   );
 });
 
-// ✅ ROTA DE LOGIN (Corrigida: Sem buscar 'role' no banco)
+// ✅ ROTA DE LOGIN (Agora lê o ROLE real do banco)
 router.post("/login", (req, res) => {
   const { ds_email, pw_senha } = req.body;
 
@@ -45,8 +45,8 @@ router.post("/login", (req, res) => {
     return res.status(400).json({ message: "E-mail e senha são obrigatórios." });
   }
 
-  // Removi 'role' do SELECT
-  const sql = "SELECT id_usuario, no_usuario, ds_email FROM tbl_usuarios WHERE ds_email = ? AND pw_senha = ?";
+  // Agora incluímos 'role' no SELECT porque a coluna existe!
+  const sql = "SELECT id_usuario, no_usuario, ds_email, lk_foto, role FROM tbl_usuarios WHERE ds_email = ? AND pw_senha = ?";
   
   db.query(sql, [ds_email, pw_senha], (err, results) => {
     if (err) {
@@ -60,12 +60,14 @@ router.post("/login", (req, res) => {
 
     const usuario = results[0];
 
-    // Atribuímos 'user' manualmente no código, já que não tem no banco
-    usuario.role = "user";
+    // Garantia extra: se por algum motivo o role vier vazio do banco, assume 'user'
+    if (!usuario.role) {
+        usuario.role = 'user';
+    }
 
     res.status(200).json({
       message: "Login realizado com sucesso!",
-      usuario,
+      usuario, // Envia o objeto completo com o role correto ('admin' ou 'user')
     });
   });
 });
