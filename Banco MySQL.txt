@@ -52,7 +52,7 @@ VALUES (1, 2, '2014-06-20', 'São Paulo');
 INSERT INTO tbl_filhos (id_usuario_filho, id_pai, id_mae)
 VALUES (3, 1, 2);
 
-SELECT * FROM tbl_usuarios
+SELECT * FROM tbl_usuarios;
 
 ALTER TABLE tbl_usuarios
 ADD COLUMN role VARCHAR(20) DEFAULT 'user';

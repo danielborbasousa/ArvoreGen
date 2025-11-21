@@ -23,12 +23,10 @@ router.get("/", (req, res) => {
   });
 });
 
-// POST - Cadastrar (CORRIGIDO PARA RECEBER IDs)
+// POST - Cadastrar para ADMIN ou USUÁRIO
 router.post("/", (req, res) => {
-  // Agora pegamos os IDs, não os nomes
   const { id_usuario_a, id_usuario_b, dt_casamento, ds_local } = req.body;
 
-  // Validação dos IDs
   if (!id_usuario_a || !id_usuario_b) {
     return res.status(400).json({ error: "Selecione os dois cônjuges na lista." });
   }
@@ -37,15 +35,21 @@ router.post("/", (req, res) => {
     return res.status(400).json({ error: "Não é possível vincular a mesma pessoa." });
   }
 
-  const sql = "INSERT INTO tbl_conjuges (usuario_a, usuario_b, dt_casamento, ds_local) VALUES (?, ?, ?, ?)";
-  
-  db.query(sql, [id_usuario_a, id_usuario_b, dt_casamento || null, ds_local || null], (err, result) => {
-    if (err) {
-      console.error("Erro ao salvar:", err);
-      return res.status(500).json({ error: "Erro ao salvar no banco." });
+  const sql = `
+    INSERT INTO tbl_conjuges (usuario_a, usuario_b, dt_casamento, ds_local)
+    VALUES (?, ?, ?, ?)
+  `;
+
+  db.query(sql,
+    [id_usuario_a, id_usuario_b, dt_casamento || null, ds_local || null],
+    (err, result) => {
+      if (err) {
+        console.error("Erro ao salvar:", err);
+        return res.status(500).json({ error: "Erro ao salvar no banco." });
+      }
+      res.status(201).json({ message: "Vínculo de cônjuges criado com sucesso!" });
     }
-    res.status(201).json({ message: "Vínculo de cônjuges criado com sucesso!" });
-  });
+  );
 });
 
 module.exports = router;
