@@ -53,3 +53,15 @@ INSERT INTO tbl_filhos (id_usuario_filho, id_pai, id_mae)
 VALUES (3, 1, 2);
 
 SELECT * FROM tbl_usuarios
+
+ALTER TABLE tbl_usuarios
+ADD COLUMN role VARCHAR(20) DEFAULT 'user';
+
+
+UPDATE tbl_usuarios 
+SET role = 'admin'
+WHERE id_usuario = 9;
+
+UPDATE tbl_usuarios 
+SET role = 'user'
+WHERE id_usuario = 1;

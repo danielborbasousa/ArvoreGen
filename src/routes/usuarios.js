@@ -2,39 +2,7 @@ const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 
-// ✅ Cadastro de usuário
-router.post("/", (req, res) => {
-  const { no_usuario, pw_senha, ds_email, nu_whatsapp, dt_nascimento, lk_foto } = req.body;
-
-  // Validação básica
-  if (!no_usuario || !pw_senha || !ds_email) {
-    return res.status(400).json({ error: "Campos obrigatórios ausentes (Nome, Senha, Email)." });
-  }
-
-  const sql = `
-    INSERT INTO tbl_usuarios 
-    (no_usuario, pw_senha, ds_email, nu_whatsapp, dt_nascimento, lk_foto, nu_vertical, nu_horizontal)
-    VALUES (?, ?, ?, ?, ?, ?, 0, 0)
-  `;
-  // Obs: nu_vertical e nu_horizontal iniciam com 0 por padrão
-
-  db.query(
-    sql, 
-    [no_usuario, pw_senha, ds_email, nu_whatsapp || null, dt_nascimento || null, lk_foto || null], 
-    (err, result) => {
-      if (err) {
-        console.error("Erro ao cadastrar usuário:", err);
-        return res.status(500).json({ error: "Erro ao cadastrar usuário no banco." });
-      }
-      res.status(201).json({
-        message: "Usuário cadastrado com sucesso!",
-        id_usuario: result.insertId,
-      });
-    }
-  );
-});
-
-// ✅ Login de usuário
+// LOGIN COM ROLE
 router.post("/login", (req, res) => {
   const { ds_email, pw_senha } = req.body;
 
@@ -42,7 +10,7 @@ router.post("/login", (req, res) => {
     return res.status(400).json({ message: "E-mail e senha são obrigatórios." });
   }
 
-  const sql = "SELECT * FROM tbl_usuarios WHERE ds_email = ? AND pw_senha = ?";
+  const sql = "SELECT id_usuario, no_usuario, ds_email, role FROM tbl_usuarios WHERE ds_email = ? AND pw_senha = ?";
   db.query(sql, [ds_email, pw_senha], (err, results) => {
     if (err) {
       console.error("Erro ao realizar login:", err);
@@ -53,22 +21,17 @@ router.post("/login", (req, res) => {
       return res.status(401).json({ message: "E-mail ou senha incorretos." });
     }
 
+    const usuario = results[0];
+
+    // Se não existir role no banco, define user
+    if (!usuario.role) {
+      usuario.role = "user";
+    }
+
     res.status(200).json({
       message: "Login realizado com sucesso!",
-      usuario: results[0],
+      usuario,
     });
-  });
-});
-
-// ✅ Listar todos os usuários
-router.get("/", (req, res) => {
-  db.query("SELECT * FROM tbl_usuarios", (err, results) => {
-    if (err) {
-      console.error("Erro ao buscar usuários:", err);
-      res.status(500).json({ error: "Erro ao buscar usuários" });
-    } else {
-      res.json(results);
-    }
   });
 });
 
