@@ -52,7 +52,7 @@ VALUES (1, 2, '2014-06-20', 'São Paulo');
 INSERT INTO tbl_filhos (id_usuario_filho, id_pai, id_mae)
 VALUES (3, 1, 2);
 
-SELECT * FROM tbl_usuarios
+SELECT * FROM tbl_usuarios;
 
 ALTER TABLE tbl_usuarios
 ADD COLUMN role VARCHAR(20) DEFAULT 'user';
@@ -65,3 +65,10 @@ WHERE id_usuario = 9;
 UPDATE tbl_usuarios 
 SET role = 'user'
 WHERE id_usuario = 1;
+
+ALTER TABLE tbl_conjuges ADD COLUMN fl_divorcio BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE tbl_conjuges ADD COLUMN dt_fim_casamento DATE NULL;
+
+
+

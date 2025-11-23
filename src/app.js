@@ -7,8 +7,11 @@ const usuariosRoutes = require("./routes/usuarios");
 const conjugesRoutes = require("./routes/conjuges");
 const filhosRoutes = require("./routes/filhos");
 const arvoreRoutes = require("./routes/arvore"); // <--- IMPORTAR NOVA ROTA
-
 const app = express();
+const emailRoutes = require("./routes/email");
+
+
+app.use("/email", emailRoutes);
 app.use(cors());
 app.use(express.json());
 

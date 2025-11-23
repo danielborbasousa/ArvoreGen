@@ -10,3 +10,9 @@ instalações no terminal
 
 
 npm install tailwindcss postcss autoprefixer
+
+npm install multer
+
+yarn add multer
+
+npm install nodemailer
