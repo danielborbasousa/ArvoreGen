@@ -1,74 +1,203 @@
-CREATE DATABASE sistema_familia;
-USE sistema_familia;
+    -- ============================================================================
+    -- SCHEMA LIMPO E FUNCIONAL - Sistema de Gestão Familiar
+    -- ============================================================================
+    -- Rode este script COMPLETO de uma vez no MySQL/MariaDB
+    -- ============================================================================
 
--- Tabela de usuários
-CREATE TABLE tbl_usuarios (
-    id_usuario BIGINT AUTO_INCREMENT PRIMARY KEY,
-    no_usuario VARCHAR(120) NOT NULL,
-    pw_senha VARCHAR(80) NOT NULL,
-    dt_nascimento DATE,
-    ds_email VARCHAR(120),
-    nu_vertical INT,
-    nu_horizontal INT,
-    nu_whatsapp VARCHAR(20),
-    lk_foto VARCHAR(80)
-);
+    -- PASSO 1: DROP LIMPO
+    -- ============================================================================
+    DROP TABLE IF EXISTS tbl_filhos;
+    DROP TABLE IF EXISTS tbl_conjuges;
+    DROP TABLE IF EXISTS tbl_avisos;
+    DROP TABLE IF EXISTS tbl_usuarios;
+    DROP DATABASE IF EXISTS sistema_familia;
 
--- Tabela de cônjuges
-CREATE TABLE tbl_conjuges (
-    id_conjuge BIGINT AUTO_INCREMENT PRIMARY KEY,
-    usuario_a BIGINT,
-    usuario_b BIGINT,
-    dt_casamento DATE,
-    ds_local VARCHAR(80),
-    FOREIGN KEY (usuario_a) REFERENCES tbl_usuarios(id_usuario),
-    FOREIGN KEY (usuario_b) REFERENCES tbl_usuarios(id_usuario)
-);
+    -- PASSO 2: CRIAR BANCO
+    -- ============================================================================
+    CREATE DATABASE sistema_familia CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    USE sistema_familia;
 
--- Tabela de filhos
-CREATE TABLE tbl_filhos (
-    id_filho BIGINT AUTO_INCREMENT PRIMARY KEY,
-    id_usuario_filho BIGINT,
-    id_pai BIGINT,
-    id_mae BIGINT,
-    FOREIGN KEY (id_usuario_filho) REFERENCES tbl_usuarios(id_usuario),
-    FOREIGN KEY (id_pai) REFERENCES tbl_usuarios(id_usuario),
-    FOREIGN KEY (id_mae) REFERENCES tbl_usuarios(id_usuario)
-);
+    -- PASSO 3: TABELA DE USUÁRIOS
+    -- ============================================================================
+    CREATE TABLE tbl_usuarios (
+        id_usuario BIGINT AUTO_INCREMENT PRIMARY KEY,
+        no_usuario VARCHAR(120) NOT NULL UNIQUE,
+        pw_senha VARCHAR(255) NOT NULL,
+        dt_nascimento DATE,
+        ds_email VARCHAR(120),
+        nu_vertical INT,
+        nu_horizontal INT,
+        nu_whatsapp VARCHAR(20),
+        lk_foto VARCHAR(255),
+        role VARCHAR(20) DEFAULT 'user',
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+        atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deletado_em DATETIME NULL,
+        
+        INDEX idx_email (ds_email),
+        INDEX idx_role (role),
+        INDEX idx_nome (no_usuario)
+    );
 
+    -- PASSO 4: TABELA DE CÔNJUGES
+    -- ============================================================================
+    CREATE TABLE tbl_conjuges (
+        id_conjuge BIGINT AUTO_INCREMENT PRIMARY KEY,
+        usuario_a BIGINT NOT NULL,
+        usuario_b BIGINT NOT NULL,
+        dt_casamento DATE,
+        ds_local VARCHAR(120),
+        fl_divorcio BOOLEAN DEFAULT FALSE,
+        dt_fim_casamento DATE NULL,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+        atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deletado_em DATETIME NULL,
+        
+        FOREIGN KEY (usuario_a) REFERENCES tbl_usuarios(id_usuario),
+        FOREIGN KEY (usuario_b) REFERENCES tbl_usuarios(id_usuario),
+        
+        INDEX idx_usuario_a (usuario_a),
+        INDEX idx_usuario_b (usuario_b),
+        INDEX idx_casal (usuario_a, usuario_b),
+        INDEX idx_deletado (deletado_em)
+    );
 
-USE sistema_familia;
+    -- PASSO 5: TABELA DE FILHOS
+    -- ============================================================================
+    CREATE TABLE tbl_filhos (
+        id_filho BIGINT AUTO_INCREMENT PRIMARY KEY,
+        id_usuario_filho BIGINT NOT NULL,
+        id_pai BIGINT,
+        id_mae BIGINT,
+        criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+        atualizado_em DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deletado_em DATETIME NULL,
+        
+        FOREIGN KEY (id_usuario_filho) REFERENCES tbl_usuarios(id_usuario),
+        FOREIGN KEY (id_pai) REFERENCES tbl_usuarios(id_usuario),
+        FOREIGN KEY (id_mae) REFERENCES tbl_usuarios(id_usuario),
+        
+        INDEX idx_filho (id_usuario_filho),
+        INDEX idx_pai (id_pai),
+        INDEX idx_mae (id_mae),
+        INDEX idx_genitor (id_pai, id_mae),
+        INDEX idx_deletado (deletado_em)
+    );
 
-INSERT INTO tbl_usuarios (no_usuario, pw_senha, dt_nascimento, ds_email, nu_vertical, nu_horizontal, nu_whatsapp, lk_foto)
-VALUES
-('João Silva', '1234', '1990-05-15', 'joao@email.com', 1, 1, '11999999999', 'joao.png'),
-('Maria Souza', '1234', '1992-08-20', 'maria@email.com', 2, 1, '11988888888', 'maria.png'),
-('Pedro Oliveira', '1234', '2015-03-10', 'pedro@email.com', 1, 2, NULL, 'pedro.png');
+    -- PASSO 6: TABELA DE AVISOS
+    -- ============================================================================
+    CREATE TABLE tbl_avisos (
+        id_aviso BIGINT AUTO_INCREMENT PRIMARY KEY,
+        titulo VARCHAR(255) NOT NULL,
+        mensagem TEXT NOT NULL,
+        data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+        
+        INDEX idx_data (data_criacao)
+    );
 
+    -- PASSO 7: INSERIR USUÁRIOS - GRUPO 1
+    -- ============================================================================
+    INSERT INTO tbl_usuarios (no_usuario, pw_senha, dt_nascimento, ds_email, nu_vertical, nu_horizontal, nu_whatsapp, lk_foto, role)
+    VALUES
+    ('João Silva', '1234', '1990-05-15', 'joao@email.com', 1, 1, '11999999999', 'joao.png', 'admin'),
+    ('Maria Souza', '1234', '1992-08-20', 'maria@email.com', 2, 1, '11988888888', 'maria.png', 'user'),
+    ('Pedro Oliveira', '1234', '2015-03-10', 'pedro@email.com', 1, 2, NULL, 'pedro.png', 'user');
 
-INSERT INTO tbl_conjuges (usuario_a, usuario_b, dt_casamento, ds_local)
-VALUES (1, 2, '2014-06-20', 'São Paulo');
+    -- PASSO 8: INSERIR USUÁRIOS - GRUPO 2 (MULHERES)
+    -- ============================================================================
+    INSERT INTO tbl_usuarios (no_usuario, pw_senha, dt_nascimento, ds_email, nu_vertical, nu_horizontal, nu_whatsapp, lk_foto, role)
+    VALUES
+    ('Ana Lima', '1234', '1991-02-10', 'ana@email.com', 2, 2, '11977777771', 'ana.png', 'user'),
+    ('Carla Mendes', '1234', '1989-07-25', 'carla@email.com', 2, 3, '11977777772', 'carla.png', 'user'),
+    ('Juliana Alves', '1234', '1993-11-05', 'juliana@email.com', 2, 4, '11977777773', 'juliana.png', 'user'),
+    ('Fernanda Rocha', '1234', '1988-09-12', 'fernanda@email.com', 2, 5, '11977777774', 'fernanda.png', 'user'),
+    ('Patricia Gomes', '1234', '1990-01-30', 'patricia@email.com', 2, 6, '11977777775', 'patricia.png', 'user');
 
-INSERT INTO tbl_filhos (id_usuario_filho, id_pai, id_mae)
-VALUES (3, 1, 2);
+    -- PASSO 9: INSERIR USUÁRIOS - GRUPO 2 (HOMENS)
+    -- ============================================================================
+    INSERT INTO tbl_usuarios (no_usuario, pw_senha, dt_nascimento, ds_email, nu_vertical, nu_horizontal, nu_whatsapp, lk_foto, role)
+    VALUES
+    ('Carlos Lima', '1234', '1987-03-18', 'carlos@email.com', 1, 3, '11966666661', 'carlos.png', 'user'),
+    ('Ricardo Mendes', '1234', '1985-06-22', 'ricardo@email.com', 1, 4, '11966666662', 'ricardo.png', 'user'),
+    ('Bruno Alves', '1234', '1992-12-01', 'bruno@email.com', 1, 5, '11966666663', 'bruno.png', 'user'),
+    ('Eduardo Rocha', '1234', '1986-04-14', 'eduardo@email.com', 1, 6, '11966666664', 'eduardo.png', 'user'),
+    ('Marcos Gomes', '1234', '1989-10-08', 'marcos@email.com', 1, 7, '11966666665', 'marcos.png', 'user');
 
-SELECT * FROM tbl_usuarios;
+    -- PASSO 10: INSERIR USUÁRIOS - FILHOS
+    -- ============================================================================
+    INSERT INTO tbl_usuarios (no_usuario, pw_senha, dt_nascimento, ds_email, nu_vertical, nu_horizontal, nu_whatsapp, lk_foto, role)
+    VALUES
+    ('Lucas Lima', '1234', '2016-05-10', 'lucas@email.com', 3, 2, NULL, 'lucas.png', 'user'),
+    ('Beatriz Mendes', '1234', '2014-08-20', 'bia@email.com', 3, 3, NULL, 'bia.png', 'user'),
+    ('Gabriel Alves', '1234', '2017-02-15', 'gabriel@email.com', 3, 4, NULL, 'gabriel.png', 'user'),
+    ('Sofia Rocha', '1234', '2015-11-30', 'sofia@email.com', 3, 5, NULL, 'sofia.png', 'user'),
+    ('Rafael Gomes', '1234', '2018-07-07', 'rafael@email.com', 3, 6, NULL, 'rafael.png', 'user');
 
-ALTER TABLE tbl_usuarios
-ADD COLUMN role VARCHAR(20) DEFAULT 'user';
+    -- PASSO 11: INSERIR CASAIS - GRUPO 1
+    -- ============================================================================
+    INSERT INTO tbl_conjuges (usuario_a, usuario_b, dt_casamento, ds_local, fl_divorcio)
+    VALUES (1, 2, '2014-06-20', 'São Paulo', FALSE);
 
+    -- PASSO 12: INSERIR CASAIS - GRUPO 2
+    -- ============================================================================
+    INSERT INTO tbl_conjuges (usuario_a, usuario_b, dt_casamento, ds_local, fl_divorcio)
+    VALUES
+    (4, 9, '2010-05-20', 'São Paulo', FALSE),
+    (5, 10, '2012-03-15', 'Rio de Janeiro', FALSE),
+    (6, 11, '2015-09-10', 'Belo Horizonte', FALSE),
+    (7, 12, '2013-12-01', 'Curitiba', FALSE),
+    (8, 13, '2011-07-25', 'Porto Alegre', FALSE);
 
-UPDATE tbl_usuarios 
-SET role = 'admin'
-WHERE id_usuario = 9;
+    -- PASSO 13: INSERIR FILHOS - GRUPO 1
+    -- ============================================================================
+    INSERT INTO tbl_filhos (id_usuario_filho, id_pai, id_mae)
+    VALUES (3, 1, 2);
 
-UPDATE tbl_usuarios 
-SET role = 'user'
-WHERE id_usuario = 1;
+    -- PASSO 14: INSERIR FILHOS - GRUPO 2
+    -- ============================================================================
+    INSERT INTO tbl_filhos (id_usuario_filho, id_pai, id_mae)
+    VALUES
+    (14, 9, 4),
+    (15, 10, 5),
+    (16, 11, 6),
+    (17, 12, 7),
+    (18, 13, 8);
 
-ALTER TABLE tbl_conjuges ADD COLUMN fl_divorcio BOOLEAN DEFAULT FALSE;
+    -- PASSO 15: VERIFICAÇÃO FINAL
+    -- ============================================================================
+    SELECT '=== USUÁRIOS ===' AS info;
+    SELECT id_usuario, no_usuario, role, dt_nascimento FROM tbl_usuarios WHERE deletado_em IS NULL ORDER BY id_usuario;
 
-ALTER TABLE tbl_conjuges ADD COLUMN dt_fim_casamento DATE NULL;
+    SELECT '=== CÔNJUGES ===' AS info;
+    SELECT 
+    c.id_conjuge, 
+    u1.no_usuario AS 'Cônjuge A', 
+    u2.no_usuario AS 'Cônjuge B', 
+    c.dt_casamento, 
+    c.fl_divorcio 
+    FROM tbl_conjuges c
+    LEFT JOIN tbl_usuarios u1 ON c.usuario_a = u1.id_usuario
+    LEFT JOIN tbl_usuarios u2 ON c.usuario_b = u2.id_usuario
+    WHERE c.deletado_em IS NULL
+    ORDER BY c.id_conjuge;
 
+    SELECT '=== FILHOS ===' AS info;
+    SELECT 
+    f.id_filho, 
+    uf.no_usuario AS 'Filho', 
+    up.no_usuario AS 'Pai', 
+    um.no_usuario AS 'Mãe'
+    FROM tbl_filhos f
+    JOIN tbl_usuarios uf ON f.id_usuario_filho = uf.id_usuario
+    LEFT JOIN tbl_usuarios up ON f.id_pai = up.id_usuario
+    LEFT JOIN tbl_usuarios um ON f.id_mae = um.id_usuario
+    WHERE f.deletado_em IS NULL
+    ORDER BY f.id_filho;
 
-
+    SELECT '=== CONTAGEM ===' AS info;
+    SELECT 
+    COUNT(DISTINCT id_usuario) AS total_usuarios,
+    (SELECT COUNT(*) FROM tbl_conjuges WHERE deletado_em IS NULL) AS total_casamentos,
+    (SELECT COUNT(*) FROM tbl_filhos WHERE deletado_em IS NULL) AS total_filhos
+    FROM tbl_usuarios 
+    WHERE deletado_em IS NULL;
